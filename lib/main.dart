@@ -16,6 +16,7 @@ class RealWorddApp extends StatefulWidget {
 class RealWorldState extends State<RealWorddApp> {
   var _isLoading = true;
   // Variable defined with the underscore makes the variable private
+  var videos;
 
   _fetchData() async {
     print('Attempting to fetch data');
@@ -27,8 +28,14 @@ class RealWorldState extends State<RealWorddApp> {
 
       final map = json.decode(response.body);
       final videosJson = map["videos"];
-      videosJson.forEach((video) {
-        print(video["name"]);
+      this.videos = videosJson;
+      // videosJson.forEach((video) {
+      //   print(video["name"]);
+      // });
+
+      setState(() {
+        _isLoading = false;
+        this.videos = videosJson;
       });
     }
   }
@@ -44,7 +51,7 @@ class RealWorldState extends State<RealWorddApp> {
               onPressed: () {
                 print("reloading..");
                 setState(() {
-                  _isLoading = false;
+                  _isLoading = true;
                 });
                 _fetchData();
               },
@@ -52,9 +59,19 @@ class RealWorldState extends State<RealWorddApp> {
         ],
       ),
       body: new Center(
-          child: _isLoading
-              ? new CircularProgressIndicator()
-              : new Text("FInished loading..")),
+        child: _isLoading
+            ? new CircularProgressIndicator()
+            : new ListView.builder(
+                itemCount: this.videos != null ? this.videos.length : 0,
+                itemBuilder: (context, i) {
+                  final video = this.videos[i];
+                  return new Column(
+                    children: [new Text(video["name"]), new Divider()],
+                  );
+                  // return new Text("Row: $i");
+                },
+              ),
+      ),
     ));
   }
 }
